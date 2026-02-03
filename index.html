@@ -1,0 +1,1313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thread Quick Open Mockup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1114;
+        --bg-2: #15181d;
+        --panel: #1c1f25;
+        --panel-2: #222630;
+        --panel-3: #2b303a;
+        --text: #f1f5f9;
+        --muted: #b3bcc8;
+        --muted-2: #8c96a5;
+        --accent: #76d6a7;
+        --accent-2: #7fb6ff;
+        --stroke: rgba(255, 255, 255, 0.08);
+        --shadow: 0 40px 120px rgba(0, 0, 0, 0.45);
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --bubble-user: rgba(127, 182, 255, 0.18);
+        --bubble-assistant: rgba(118, 214, 167, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        min-height: 100vh;
+        background: radial-gradient(1200px 800px at 80% 10%, #1d2330 0%, transparent 60%),
+          radial-gradient(900px 700px at 20% 85%, #1b2420 0%, transparent 55%),
+          var(--bg);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 32px;
+        color: var(--text);
+      }
+
+      .page {
+        width: min(1280px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .instructions {
+        background: rgba(20, 23, 29, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 18px 22px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        display: grid;
+        gap: 8px;
+      }
+
+      .instructions h1 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #f7f9fd;
+      }
+
+      .instructions p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .instruction-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        color: #d9e4f2;
+      }
+
+      .instruction-row span {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .window {
+        width: 100%;
+        height: min(820px, 90vh);
+        background: linear-gradient(160deg, #1a1e25 0%, #13161c 55%, #101217 100%);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .titlebar {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: rgba(12, 14, 18, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .traffic {
+        display: flex;
+        gap: 8px;
+      }
+
+      .traffic span {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #2a2f3a;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+
+      .traffic span:nth-child(1) {
+        background: #f56b5c;
+      }
+
+      .traffic span:nth-child(2) {
+        background: #f5c35c;
+      }
+
+      .traffic span:nth-child(3) {
+        background: #6ed18a;
+      }
+
+      .titlebar .title {
+        font-weight: 600;
+        color: #d9dee7;
+        letter-spacing: 0.02em;
+      }
+
+      .titlebar .action {
+        font-size: 13px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: pointer;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        height: calc(100% - 56px);
+      }
+
+      aside {
+        padding: 24px 18px;
+        background: linear-gradient(180deg, #1b1e24 0%, #16181e 100%);
+        border-right: 1px solid rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+
+      .nav-item.active {
+        background: rgba(118, 214, 167, 0.12);
+        color: #e7fff3;
+      }
+
+      .section-label {
+        font-size: 12px;
+        color: var(--muted-2);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-top: 8px;
+      }
+
+      .thread-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 360px;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .thread-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: #d6dce6;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      .thread-list li span {
+        font-size: 12px;
+        color: var(--muted-2);
+      }
+
+      .thread-list li.active {
+        background: rgba(127, 182, 255, 0.18);
+        border-color: rgba(127, 182, 255, 0.3);
+        color: #ecf4ff;
+      }
+
+      main {
+        position: relative;
+        padding: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .thread-view {
+        width: min(780px, 100%);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .thread-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .thread-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #f5f7fb;
+      }
+
+      .thread-meta {
+        font-size: 13px;
+        color: var(--muted-2);
+        margin-top: 4px;
+      }
+
+      .thread-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .thread-actions .pill {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .message-list {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .message {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--muted-2);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .message .bubble {
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .message.user .bubble {
+        background: var(--bubble-user);
+        border-color: rgba(127, 182, 255, 0.28);
+      }
+
+      .message.assistant .bubble {
+        background: var(--bubble-assistant);
+        border-color: rgba(118, 214, 167, 0.24);
+      }
+
+      .bubble code {
+        font-family: "IBM Plex Mono", monospace;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+
+      .bubble pre {
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13px;
+        overflow-x: auto;
+      }
+
+      .composer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .composer .hint {
+        font-size: 12px;
+        color: var(--muted-2);
+        font-family: "IBM Plex Mono", monospace;
+        white-space: nowrap;
+      }
+
+      .composer .input {
+        flex: 1;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .overlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(9, 11, 14, 0.65);
+        backdrop-filter: blur(6px);
+      }
+
+      .overlay.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .shortcut-pill {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(118, 214, 167, 0.18);
+        border: 1px solid rgba(118, 214, 167, 0.3);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 13px;
+        color: #ddfff1;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        z-index: 2;
+        animation: popIn 0.45s ease both;
+      }
+
+      .palette {
+        width: min(720px, 86%);
+        background: linear-gradient(160deg, #20242c 0%, #1b1f27 60%, #181c23 100%);
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        z-index: 2;
+        animation: liftIn 0.5s ease both;
+      }
+
+      .palette-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .palette-title {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .palette-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .kbd {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        color: #dbe5f3;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 4px 8px;
+        border-radius: 8px;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        background: var(--panel-2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 16px;
+        color: var(--text);
+      }
+
+      .search .icon {
+        font-size: 18px;
+        color: var(--muted-2);
+      }
+
+      .search input {
+        background: transparent;
+        border: none;
+        color: var(--text);
+        font-size: 16px;
+        width: 100%;
+        font-family: inherit;
+      }
+
+      .search input::placeholder {
+        color: var(--muted-2);
+      }
+
+      .search input:focus {
+        outline: none;
+      }
+
+      .results {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 160px;
+      }
+
+      .result {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 12px;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        animation: fadeUp 0.6s ease both;
+      }
+
+      .result .meta {
+        font-size: 12px;
+        color: var(--muted-2);
+      }
+
+      .result .preview {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .result .name {
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .result .hint {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: #dce9ff;
+      }
+
+      .result.selected {
+        background: linear-gradient(120deg, rgba(127, 182, 255, 0.24), rgba(118, 214, 167, 0.16));
+        border-color: rgba(127, 182, 255, 0.35);
+        box-shadow: inset 0 0 0 1px rgba(118, 214, 167, 0.2);
+      }
+
+      .highlight {
+        background: rgba(127, 182, 255, 0.35);
+        color: #f8fbff;
+        padding: 0 4px;
+        border-radius: 6px;
+      }
+
+      .result.empty {
+        grid-template-columns: 1fr;
+        text-align: center;
+        color: var(--muted-2);
+      }
+
+      .footer {
+        font-size: 12px;
+        color: var(--muted-2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .footer .keys {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      @keyframes liftIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -8px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0) scale(1);
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+
+        aside {
+          display: none;
+        }
+
+        .window {
+          height: auto;
+        }
+
+        main {
+          padding: 32px 20px 120px;
+        }
+
+        .shortcut-pill {
+          top: 72px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 20px;
+        }
+
+        .palette {
+          padding: 18px;
+        }
+
+        .palette-head {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .footer {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="instructions" aria-label="Mockup instructions">
+        <h1>Quick Open mockup (thread switcher)</h1>
+        <p>
+          Press the shortcuts below to reveal the command palette, search threads (title prioritized
+          over body matches), and jump into a conversation. When the palette is closed, ⌘J/⌘K steps
+          through threads in the sidebar and updates the main thread view.
+        </p>
+        <div class="instruction-row">
+          <span>⌘ O / Ctrl O — Open palette</span>
+          <span>Type — Search title + message body</span>
+          <span>↑/↓ or ⌘ J/⌘ K — Navigate results</span>
+          <span>Enter — Open thread</span>
+          <span>Esc — Close palette</span>
+          <span>⌘ J/⌘ K — Switch threads</span>
+        </div>
+      </section>
+
+      <div class="window" role="img" aria-label="Mockup showing a command palette for quick thread switching">
+      <div class="titlebar">
+        <div class="traffic">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="title">Codex</div>
+        <button class="action" id="openPalette" type="button">Open</button>
+      </div>
+      <div class="content">
+        <aside>
+          <div class="nav-item active">New thread</div>
+          <div class="nav-item">Automations</div>
+          <div class="nav-item">Skills</div>
+          <div class="section-label">Threads</div>
+          <ul class="thread-list" id="sidebarThreads"></ul>
+        </aside>
+        <main>
+          <div class="thread-view">
+            <div class="thread-header">
+              <div>
+                <div class="thread-title" id="threadTitle">Create shortcut mockup for thread switching</div>
+                <div class="thread-meta" id="threadMeta">Coding · 19m · 14 messages</div>
+              </div>
+              <div class="thread-actions">
+                <div class="pill">⌘ O</div>
+                <div class="pill">Quick Open</div>
+              </div>
+            </div>
+            <div class="message-list" id="messageList"></div>
+            <div class="composer">
+              <div class="hint">⌘ O Quick Open · ⌘ J/⌘ K Switch Threads</div>
+              <div class="input">Type a thread name to jump anywhere…</div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <div class="overlay" id="palette" aria-hidden="true">
+        <div class="shortcut-pill">⌘ O • Quick Open</div>
+        <div class="palette" role="dialog" aria-label="Open thread">
+          <div class="palette-head">
+            <div>
+              <div class="palette-title">Open Thread</div>
+              <div class="palette-sub">Jump to any thread by typing its name</div>
+            </div>
+            <div class="kbd">Press ⌘ O</div>
+          </div>
+          <div class="search">
+            <span class="icon">⌕</span>
+            <input
+              id="threadSearch"
+              type="text"
+              placeholder="Search threads, workspaces, or tags"
+              autocomplete="off"
+              aria-label="Search threads"
+            />
+          </div>
+          <div class="results" id="results" aria-live="polite"></div>
+          <div class="footer">
+            <div class="keys">↑↓ or ⌘ J/⌘ K Navigate · Enter Open · Esc Close · ⌘ ⌫ Delete</div>
+            <div class="keys">Tip: start typing to fuzzy match titles</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <script>
+      const palette = document.getElementById("palette");
+      const searchInput = document.getElementById("threadSearch");
+      const resultsEl = document.getElementById("results");
+      const openButton = document.getElementById("openPalette");
+      const sidebarThreads = document.getElementById("sidebarThreads");
+      const threadTitle = document.getElementById("threadTitle");
+      const threadMeta = document.getElementById("threadMeta");
+      const messageList = document.getElementById("messageList");
+
+      const threads = [
+        {
+          name: "Create shortcut mockup for thread switching",
+          workspace: "Coding",
+          time: "19m",
+          messages: 8,
+          transcript: [
+            {
+              role: "user",
+              time: "2:34 PM",
+              text: "Make a UX mockup showing ⌘ O opening a thread switcher palette.",
+            },
+            {
+              role: "assistant",
+              time: "2:35 PM",
+              text: "On it. I will build a command palette overlay with search, results, and keyboard hints.",
+            },
+            {
+              role: "user",
+              time: "2:38 PM",
+              text: "Add basic functionality so I can actually open threads with the keyboard.",
+            },
+            {
+              role: "assistant",
+              time: "2:39 PM",
+              text: "Done. ⌘ O opens it, arrows navigate, Enter opens, Esc closes.",
+            },
+            {
+              role: "user",
+              time: "2:41 PM",
+              text: "When I enter a thread, it should look like an actual thread.",
+            },
+            {
+              role: "assistant",
+              time: "2:42 PM",
+              text: "Added a header, message bubbles, and a composer bar.",
+            },
+            {
+              role: "user",
+              time: "2:43 PM",
+              text: "Add a little personality but keep it pro.",
+            },
+            {
+              role: "assistant",
+              time: "2:44 PM",
+              text: "Will do. Slightly witty, still realistic.",
+            },
+          ],
+        },
+        {
+          name: "Locate Codex CLI threads",
+          workspace: "Coding",
+          time: "19m",
+          messages: 6,
+          transcript: [
+            {
+              role: "user",
+              time: "11:04 AM",
+              text: "Where are Codex CLI threads stored?",
+            },
+            {
+              role: "assistant",
+              time: "11:05 AM",
+              text: "They live in a local session store. I can locate the JSONL files and map them to folders.",
+            },
+            {
+              role: "assistant",
+              time: "11:07 AM",
+              text: "Found sessions grouped by date with cwd metadata and thread titles.",
+            },
+            {
+              role: "user",
+              time: "11:08 AM",
+              text: "Any risk if I move them?",
+            },
+            {
+              role: "assistant",
+              time: "11:09 AM",
+              text: "Moving should be safe if names stay intact, but a backup is a good safety belt.",
+            },
+            {
+              role: "user",
+              time: "11:10 AM",
+              text: "Good call. I will index them instead of moving.",
+            },
+          ],
+        },
+        {
+          name: "Inside ~/Coding",
+          workspace: "Ops",
+          time: "1w",
+          messages: 7,
+          transcript: [
+            {
+              role: "user",
+              time: "9:12 AM",
+              text: "Scan the workspace and list the active projects.",
+            },
+            {
+              role: "assistant",
+              time: "9:13 AM",
+              text: "On it. I will group by recency and flag the heavy hitters.",
+            },
+            {
+              role: "assistant",
+              time: "9:14 AM",
+              text: "Prelim scan: a few folders are busy, the rest are hibernating.",
+            },
+            {
+              role: "user",
+              time: "9:15 AM",
+              text: "Highlight the top five with one-line descriptions.",
+            },
+            {
+              role: "assistant",
+              time: "9:16 AM",
+              text: "Got it. I will separate signal vs. build-artifact noise.",
+            },
+            {
+              role: "user",
+              time: "9:17 AM",
+              text: "Yes please, my disk is a drama queen.",
+            },
+            {
+              role: "assistant",
+              time: "9:18 AM",
+              text: "Copy that. I will give you a clean, calm summary.",
+            },
+          ],
+        },
+        {
+          name: "Context - Goal: diagnose why Codex",
+          workspace: "Coding",
+          time: "3w",
+          messages: 7,
+          transcript: [
+            {
+              role: "user",
+              time: "4:02 PM",
+              text: "Why is the prompt memory not showing up in the app?",
+            },
+            {
+              role: "assistant",
+              time: "4:04 PM",
+              text: "Likely a missing context lookup. I will trace the client call and local cache first.",
+            },
+            {
+              role: "assistant",
+              time: "4:06 PM",
+              text: "Found empty cache hits when the thread id changes mid-load.",
+            },
+            {
+              role: "user",
+              time: "4:07 PM",
+              text: "Is it a race condition?",
+            },
+            {
+              role: "assistant",
+              time: "4:08 PM",
+              text: "Possibly. I'd debounce the write and add a guard on read.",
+            },
+            {
+              role: "user",
+              time: "4:09 PM",
+              text: "Ship a quick fix and a proper one.",
+            },
+            {
+              role: "assistant",
+              time: "4:10 PM",
+              text: "Quick fix: fall back to local memory. Proper fix: rehydrate on open.",
+            },
+          ],
+        },
+        {
+          name: "Google just made a very simple",
+          workspace: "Research",
+          time: "3w",
+          messages: 5,
+          transcript: [
+            {
+              role: "user",
+              time: "10:18 AM",
+              text: "Summarize the new product announcement in three bullets.",
+            },
+            {
+              role: "assistant",
+              time: "10:19 AM",
+              text: "Sure. I will cover the headline, capabilities, and launch timeline.",
+            },
+            {
+              role: "assistant",
+              time: "10:20 AM",
+              text: "Added a short 'so what' line so it reads like a briefing.",
+            },
+            {
+              role: "user",
+              time: "10:21 AM",
+              text: "Great. Keep it under 80 words.",
+            },
+            {
+              role: "assistant",
+              time: "10:22 AM",
+              text: "Done. It fits on a sticky note.",
+            },
+          ],
+        },
+        {
+          name: "mkdir a YTtoMP3 folder and place",
+          workspace: "Coding",
+          time: "3w",
+          messages: 6,
+          transcript: [
+            {
+              role: "user",
+              time: "8:44 AM",
+              text: "Create a small script to bootstrap a new project folder structure.",
+            },
+            {
+              role: "assistant",
+              time: "8:45 AM",
+              text: "Created folders and a starter README.",
+            },
+            {
+              role: "user",
+              time: "8:46 AM",
+              text: "Add a quick 'next steps' checklist.",
+            },
+            {
+              role: "assistant",
+              time: "8:47 AM",
+              text: "Added a tiny checklist. No fluff, just the essentials.",
+            },
+            {
+              role: "user",
+              time: "8:48 AM",
+              text: "Perfect. My future self says thanks.",
+            },
+            {
+              role: "assistant",
+              time: "8:49 AM",
+              text: "Future you owes present you coffee.",
+            },
+          ],
+        },
+        {
+          name: "Take a look at @0-meta/tools",
+          workspace: "Systems",
+          time: "2w",
+          messages: 6,
+          transcript: [
+            {
+              role: "user",
+              time: "3:22 PM",
+              text: "Catalog the tools folder and summarize what each does.",
+            },
+            {
+              role: "assistant",
+              time: "3:23 PM",
+              text: "Mapped tools to purpose and status.",
+            },
+            {
+              role: "user",
+              time: "3:24 PM",
+              text: "Tag anything risky or deprecated.",
+            },
+            {
+              role: "assistant",
+              time: "3:25 PM",
+              text: "Flagged two scripts with hardcoded paths.",
+            },
+            {
+              role: "user",
+              time: "3:26 PM",
+              text: "Yikes. Put them in a 'needs-love' list.",
+            },
+            {
+              role: "assistant",
+              time: "3:27 PM",
+              text: "Done. They now have a gentle, honest nudge.",
+            },
+          ],
+        },
+      ];
+
+      let isOpen = false;
+      let selectedIndex = 0;
+      let filtered = [...threads];
+      let currentThread = threads[0];
+      let currentQuery = "";
+
+      const getMessageCount = (thread) =>
+        thread.transcript ? thread.transcript.length : thread.messages || 0;
+
+      const escapeHtml = (value) => {
+        const div = document.createElement("div");
+        div.textContent = value;
+        return div.innerHTML;
+      };
+
+      const highlightText = (value, query) => {
+        if (!query) return escapeHtml(value);
+        const lower = value.toLowerCase();
+        const needle = query.toLowerCase();
+        let start = 0;
+        let output = "";
+        while (start < value.length) {
+          const idx = lower.indexOf(needle, start);
+          if (idx === -1) {
+            output += escapeHtml(value.slice(start));
+            break;
+          }
+          output += escapeHtml(value.slice(start, idx));
+          output += `<span class="highlight">${escapeHtml(value.slice(idx, idx + needle.length))}</span>`;
+          start = idx + needle.length;
+        }
+        return output;
+      };
+
+      const buildSnippet = (value, query, radius = 32) => {
+        if (!query) return "";
+        const lower = value.toLowerCase();
+        const idx = lower.indexOf(query.toLowerCase());
+        if (idx === -1) return "";
+        const start = Math.max(idx - radius, 0);
+        const end = Math.min(idx + query.length + radius, value.length);
+        let snippet = value.slice(start, end);
+        if (start > 0) snippet = `…${snippet}`;
+        if (end < value.length) snippet = `${snippet}…`;
+        return snippet;
+      };
+
+      const openPalette = () => {
+        if (isOpen) return;
+        isOpen = true;
+        palette.classList.add("is-open");
+        palette.setAttribute("aria-hidden", "false");
+        searchInput.value = "";
+        currentQuery = "";
+        filtered = threads.map((thread) => ({
+          thread,
+          score: 0,
+          titleMatch: false,
+          bodyMatch: false,
+          snippet: "",
+        }));
+        selectedIndex = 0;
+        renderResults();
+        setTimeout(() => searchInput.focus(), 50);
+      };
+
+      const closePalette = () => {
+        if (!isOpen) return;
+        isOpen = false;
+        palette.classList.remove("is-open");
+        palette.setAttribute("aria-hidden", "true");
+        searchInput.blur();
+      };
+
+      const renderResults = () => {
+        resultsEl.innerHTML = "";
+        if (filtered.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "result empty";
+          empty.textContent = "No threads found. Try another keyword.";
+          resultsEl.appendChild(empty);
+          return;
+        }
+
+        filtered.forEach((item, index) => {
+          const { thread, titleMatch, bodyMatch, snippet } = item;
+          const row = document.createElement("div");
+          row.className = "result" + (index === selectedIndex ? " selected" : "");
+          const metaLabel = currentQuery
+            ? titleMatch
+              ? "Title match"
+              : bodyMatch
+                ? "Message match"
+                : ""
+            : "";
+          const snippetHtml = snippet
+            ? `<div class="preview">${highlightText(snippet, currentQuery)}</div>`
+            : "";
+          row.innerHTML = `
+            <div>
+              <div class="name">${highlightText(thread.name, currentQuery)}</div>
+              <div class="meta">${thread.workspace} · ${thread.time} · ${getMessageCount(
+                thread
+              )} messages${metaLabel ? ` · ${metaLabel}` : ""}</div>
+              ${snippetHtml}
+            </div>
+            <div class="hint">↩ Open</div>
+          `;
+          row.addEventListener("click", () => {
+            selectedIndex = index;
+            applySelection();
+            openSelectedThread();
+          });
+          resultsEl.appendChild(row);
+        });
+      };
+
+      const applySelection = () => {
+        const nodes = resultsEl.querySelectorAll(".result");
+        nodes.forEach((node, index) => {
+          node.classList.toggle("selected", index === selectedIndex);
+        });
+      };
+
+      const renderThread = (thread) => {
+        currentThread = thread;
+        threadTitle.textContent = thread.name;
+        threadMeta.textContent = `${thread.workspace} · ${thread.time} · ${getMessageCount(
+          thread
+        )} messages`;
+        messageList.innerHTML = "";
+
+        thread.transcript.forEach((message) => {
+          const row = document.createElement("div");
+          row.className = `message ${message.role}`;
+          const safeText = escapeHtml(message.text).replace(/\n/g, "<br>");
+          row.innerHTML = `
+            <div class="message-header">
+              <span>${message.role === "user" ? "You" : "Codex"}</span>
+              <span>${message.time}</span>
+            </div>
+            <div class="bubble">${safeText}</div>
+          `;
+          messageList.appendChild(row);
+        });
+        messageList.scrollTop = 0;
+      };
+
+      const renderSidebar = () => {
+        sidebarThreads.innerHTML = "";
+        threads.forEach((thread) => {
+          const item = document.createElement("li");
+          item.className = thread.name === currentThread.name ? "active" : "";
+          item.innerHTML = `${thread.name} <span>${thread.time}</span>`;
+          item.addEventListener("click", () => {
+            renderThread(thread);
+            renderSidebar();
+          });
+          sidebarThreads.appendChild(item);
+        });
+      };
+
+      const openSelectedThread = () => {
+        if (!filtered[selectedIndex]) return;
+        renderThread(filtered[selectedIndex].thread);
+        renderSidebar();
+        closePalette();
+      };
+
+      const navigateThread = (delta) => {
+        const currentIndex = Math.max(
+          0,
+          threads.findIndex((thread) => thread.name === currentThread.name)
+        );
+        const nextIndex = Math.min(Math.max(currentIndex + delta, 0), threads.length - 1);
+        if (nextIndex === currentIndex) return;
+        renderThread(threads[nextIndex]);
+        renderSidebar();
+      };
+
+      const updateFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        currentQuery = query;
+        if (!query) {
+          filtered = threads.map((thread) => ({
+            thread,
+            score: 0,
+            titleMatch: false,
+            bodyMatch: false,
+            snippet: "",
+          }));
+          selectedIndex = 0;
+          renderResults();
+          return;
+        }
+
+        filtered = threads
+          .map((thread) => {
+            const titleMatch = thread.name.toLowerCase().includes(query);
+            const workspaceMatch = thread.workspace.toLowerCase().includes(query);
+            let bodyMatch = false;
+            let snippet = "";
+
+            for (const message of thread.transcript) {
+              if (message.text.toLowerCase().includes(query)) {
+                bodyMatch = true;
+                snippet = buildSnippet(message.text, query);
+                break;
+              }
+            }
+
+            const score = titleMatch ? 2 : bodyMatch ? 1 : workspaceMatch ? 1 : -1;
+            return { thread, score, titleMatch, bodyMatch, snippet };
+          })
+          .filter((item) => item.score >= 0)
+          .sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.thread.name.localeCompare(b.thread.name);
+          });
+        selectedIndex = 0;
+        renderResults();
+      };
+
+      openButton.addEventListener("click", openPalette);
+      searchInput.addEventListener("input", updateFilter);
+
+      document.addEventListener("keydown", (event) => {
+        const isMeta = event.metaKey || event.ctrlKey;
+        if (isMeta && event.key.toLowerCase() === "o") {
+          event.preventDefault();
+          openPalette();
+          return;
+        }
+
+        if (!isOpen) {
+          if (isMeta && event.key.toLowerCase() === "j") {
+            event.preventDefault();
+            navigateThread(1);
+          }
+
+          if (isMeta && event.key.toLowerCase() === "k") {
+            event.preventDefault();
+            navigateThread(-1);
+          }
+          return;
+        }
+
+        if (isMeta && event.key.toLowerCase() === "j") {
+          event.preventDefault();
+          selectedIndex = Math.min(selectedIndex + 1, Math.max(filtered.length - 1, 0));
+          applySelection();
+          return;
+        }
+
+        if (isMeta && event.key.toLowerCase() === "k") {
+          event.preventDefault();
+          selectedIndex = Math.max(selectedIndex - 1, 0);
+          applySelection();
+          return;
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closePalette();
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          selectedIndex = Math.min(selectedIndex + 1, Math.max(filtered.length - 1, 0));
+          applySelection();
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          selectedIndex = Math.max(selectedIndex - 1, 0);
+          applySelection();
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          openSelectedThread();
+        }
+      });
+
+      palette.addEventListener("click", (event) => {
+        if (event.target === palette) {
+          closePalette();
+        }
+      });
+
+      renderThread(currentThread);
+      renderSidebar();
+      renderResults();
+    </script>
+  </body>
+</html>
