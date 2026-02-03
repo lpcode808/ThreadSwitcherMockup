@@ -3,7 +3,7 @@
 A lightweight UX mockup for a “Quick Open” thread switcher (Command Palette style). It simulates
 keyboard navigation across threads and a realistic conversation view.
 
-[!NOTE] Submitted to issue [#6500](https://github.com/openai/codex/issues/6500)
+> Submitted to issue [#6500](https://github.com/openai/codex/issues/6500)
 
 ## Live Demo
 
